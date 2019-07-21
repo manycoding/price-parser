@@ -152,6 +152,16 @@ you can set it directly:
 Price(amount=Decimal('1000'), currency='EUR')
 
 
+Decimal separator
+-----------------
+
+``decimal_separator`` allows to set it which is useful if it's known beforehands.
+Comes handy in special cases.
+
+>>> Price.fromstring("Price: $119.600000", decimal_separator=".")
+Price(amount=Decimal('119.600000'), currency='$')
+
+
 Contributing
 ============
 

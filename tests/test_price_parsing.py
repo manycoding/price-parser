@@ -26,9 +26,11 @@ class Example(Price):
                  price_raw: Optional[str],
                  currency: Optional[str],
                  amount_text: Optional[str],
-                 amount_float: Optional[Union[float, Decimal]]) -> None:
+                 amount_float: Optional[Union[float, Decimal]],
+                 decimal_separator: Optional[str] = None) -> None:
         self.currency_raw = currency_raw
         self.price_raw = price_raw
+        self.decimal_separator = decimal_separator
         amount_decimal = None  # type: Optional[Decimal]
         if isinstance(amount_float, Decimal):
             amount_decimal = amount_float
@@ -1959,6 +1961,17 @@ PRICE_PARSING_EXAMPLES_XFAIL = [
             '$', None, None),
 ]
 
+PRICE_PARSING_EXAMPLES_DECIMAL_SEPARATOR = [
+    Example(None, '14,850 EUR',
+            'EUR', '14,850', 14.85, ","),
+    Example(None, '$4,350.000',
+            '$', '4,350.000', 4350, "."),
+]
+
+PRICE_PARSING_EXAMPLES_DECIMAL_SEPARATOR_XFAIL = [
+    Example(None, '1,250€600',
+            '€', '1,250.600', 1250.6, "€"),
+]
 
 @pytest.mark.parametrize(
     ["example"],
@@ -1970,10 +1983,15 @@ PRICE_PARSING_EXAMPLES_XFAIL = [
     [[e] for e in PRICE_PARSING_EXAMPLES_NO_PRICE] +
     [[e] for e in PRICE_PARSING_EXAMPLES_NO_CURRENCY] +
     [pytest.param(e, marks=pytest.mark.xfail())
-     for e in PRICE_PARSING_EXAMPLES_XFAIL]
+     for e in PRICE_PARSING_EXAMPLES_XFAIL] +
+    [[e] for e in PRICE_PARSING_EXAMPLES_DECIMAL_SEPARATOR] +
+    [pytest.param(e, marks=pytest.mark.xfail())
+     for e in PRICE_PARSING_EXAMPLES_DECIMAL_SEPARATOR_XFAIL]
 )
 def test_parsing(example: Example):
-    parsed = Price.fromstring(example.price_raw, example.currency_raw)
+    parsed = Price.fromstring(example.price_raw,
+                              example.currency_raw,
+                              example.decimal_separator)
     assert parsed == example
 
 
